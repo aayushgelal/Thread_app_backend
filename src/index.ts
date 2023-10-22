@@ -13,7 +13,7 @@ const gqlserver = new ApolloServer({
   }`,
   resolvers: {
     Query: {
-      Hello: () => "Hi bro",
+      Hello: () => "Hi br",
       Name: (_m, { name }: { name: string }) => `Hey ${name}`,
     },
   },
