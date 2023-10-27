@@ -8,23 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const express4_1 = require("@apollo/server/express4");
-const graphql_1 = require("./graphql");
-const app = (0, express_1.default)();
-const PORT = 5000;
-function init() {
-    return __awaiter(this, void 0, void 0, function* () {
-        app.use(express_1.default.json());
-        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)()));
-    });
-}
-init();
-app.get("/", (req, res) => {
-    res.sendStatus(200).json({ message: "running successfully" });
-});
-app.listen(PORT, () => console.log("running successfully"));
+exports.resolvers = void 0;
+const user_1 = require("../../services/user");
+exports.resolvers = {
+    queries: {
+        getUserToken: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield user_1.UserService.generateJWTToken(payload);
+            return res;
+        }),
+    },
+    mutations: {
+        createUser: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield user_1.UserService.createUser(payload);
+            return res.id;
+        }),
+    },
+};

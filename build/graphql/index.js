@@ -12,19 +12,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const express4_1 = require("@apollo/server/express4");
-const graphql_1 = require("./graphql");
-const app = (0, express_1.default)();
-const PORT = 5000;
-function init() {
+exports.createGraphqlServer = void 0;
+const server_1 = require("@apollo/server");
+const users_1 = __importDefault(require("./users"));
+function createGraphqlServer() {
     return __awaiter(this, void 0, void 0, function* () {
-        app.use(express_1.default.json());
-        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)()));
+        const gqlserver = new server_1.ApolloServer({
+            typeDefs: `
+    ${users_1.default.typeDefs}
+    type Query{
+        ${users_1.default.queries}
+    }
+    type Mutation{
+        ${users_1.default.mutation}
+
+    }
+    `,
+            resolvers: {
+                Query: users_1.default.resolvers.queries,
+                Mutation: users_1.default.resolvers.mutations,
+            },
+        });
+        yield gqlserver.start();
+        return gqlserver;
     });
 }
-init();
-app.get("/", (req, res) => {
-    res.sendStatus(200).json({ message: "running successfully" });
-});
-app.listen(PORT, () => console.log("running successfully"));
+exports.createGraphqlServer = createGraphqlServer;
