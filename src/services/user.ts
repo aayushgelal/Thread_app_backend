@@ -37,7 +37,6 @@ export class UserService {
   }
   public static async generateJWTToken(payload: GenerateJWTPayload) {
     const { email, password } = payload;
-    console.log(payload);
     const user = await UserService.getUserbyMail(email);
     if (!user) {
       throw new Error("error user not found");
@@ -50,5 +49,15 @@ export class UserService {
     }
     const token = JWT.sign({ id: user.id, email: user.email }, JWTSECRETKEY);
     return token;
+  }
+  public static async decodeJWTToken(payload: string) {
+    return JWT.verify(payload, JWTSECRETKEY);
+  }
+  public static findUser(payload: string) {
+    return Prisma_Client.user.findUnique({
+      where: {
+        id: payload,
+      },
+    });
   }
 }

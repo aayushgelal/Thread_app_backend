@@ -11,6 +11,13 @@ export const resolvers = {
       const res = await UserService.generateJWTToken(payload);
       return res;
     },
+    getCurrentUserLoggedIn: async (_: any, params: null, context: any) => {
+      if (context.user) {
+        const user = await UserService.findUser(context.user.id);
+        return { ...user };
+      }
+      throw new Error("Who are you??");
+    },
   },
   mutations: {
     createUser: async (_: any, payload: CreateUserPayload) => {

@@ -15,12 +15,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const express4_1 = require("@apollo/server/express4");
 const graphql_1 = require("./graphql");
+const user_1 = require("./services/user");
 const app = (0, express_1.default)();
 const PORT = 5000;
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         app.use(express_1.default.json());
-        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)()));
+        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)(), {
+            context: ({ req }) => __awaiter(this, void 0, void 0, function* () {
+                const token = req.headers["token"];
+                try {
+                    const user = yield user_1.UserService.decodeJWTToken(token);
+                    return { user };
+                }
+                catch (_a) { }
+            }),
+        }));
     });
 }
 init();

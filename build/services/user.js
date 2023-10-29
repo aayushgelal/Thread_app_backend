@@ -41,7 +41,6 @@ class UserService {
     static generateJWTToken(payload) {
         return __awaiter(this, void 0, void 0, function* () {
             const { email, password } = payload;
-            console.log(payload);
             const user = yield UserService.getUserbyMail(email);
             if (!user) {
                 throw new Error("error user not found");
@@ -53,6 +52,18 @@ class UserService {
             }
             const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email }, JWTSECRETKEY);
             return token;
+        });
+    }
+    static decodeJWTToken(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return jsonwebtoken_1.default.verify(payload, JWTSECRETKEY);
+        });
+    }
+    static findUser(payload) {
+        return db_1.Prisma_Client.user.findUnique({
+            where: {
+                id: payload,
+            },
         });
     }
 }

@@ -17,6 +17,13 @@ exports.resolvers = {
             const res = yield user_1.UserService.generateJWTToken(payload);
             return res;
         }),
+        getCurrentUserLoggedIn: (_, params, context) => __awaiter(void 0, void 0, void 0, function* () {
+            if (context.user) {
+                const user = yield user_1.UserService.findUser(context.user.id);
+                return Object.assign({}, user);
+            }
+            throw new Error("Who are you??");
+        }),
     },
     mutations: {
         createUser: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
