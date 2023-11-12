@@ -13,9 +13,13 @@ exports.resolvers = void 0;
 const user_1 = require("../../services/user");
 exports.resolvers = {
     queries: {
-        getUserToken: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield user_1.UserService.generateJWTToken(payload);
-            return res;
+        UserLogin: (_, payload, { req, res }) => __awaiter(void 0, void 0, void 0, function* () {
+            const token = yield user_1.UserService.generateJWTToken(payload);
+            res.cookie("access-token", token, {
+                expires: new Date(Date.now() + 30 * 24 * 3600000),
+            });
+            const user = yield user_1.UserService.decodeJWTToken(token);
+            return user;
         }),
         getCurrentUserLoggedIn: (_, params, context) => __awaiter(void 0, void 0, void 0, function* () {
             if (context.user) {

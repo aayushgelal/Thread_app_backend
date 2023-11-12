@@ -25,7 +25,7 @@ class UserService {
         return (0, crypto_1.createHmac)("sha256", salt).update(password).digest("hex");
     }
     static createUser(payload) {
-        const { firstName, lastName, email, password } = payload;
+        const { firstName, lastName, email, password, username } = payload;
         const salt = (0, crypto_1.randomBytes)(32).toString("hex");
         const hashed_password = UserService.generateHash(salt, password);
         return db_1.Prisma_Client.user.create({
@@ -34,6 +34,7 @@ class UserService {
                 lastName,
                 email,
                 password: hashed_password,
+                username,
                 salt,
             },
         });
@@ -50,7 +51,14 @@ class UserService {
             if (hashed_password != user.password) {
                 throw new Error("the password is wrong");
             }
-            const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email }, JWTSECRETKEY);
+            const token = jsonwebtoken_1.default.sign({
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                profileImageURL: user.profileImageUrl,
+                username: user.username,
+            }, JWTSECRETKEY);
             return token;
         });
     }

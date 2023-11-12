@@ -15,22 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createGraphqlServer = void 0;
 const server_1 = require("@apollo/server");
 const users_1 = __importDefault(require("./users"));
+const posts_1 = __importDefault(require("./posts"));
 function createGraphqlServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const gqlserver = new server_1.ApolloServer({
             typeDefs: `
     ${users_1.default.typeDefs}
+    ${posts_1.default.typeDefs}
     type Query{
         ${users_1.default.queries}
+        ${posts_1.default.queries}
     }
     type Mutation{
         ${users_1.default.mutation}
+        ${posts_1.default.mutation}
 
     }
     `,
             resolvers: {
-                Query: users_1.default.resolvers.queries,
-                Mutation: users_1.default.resolvers.mutations,
+                Query: Object.assign(Object.assign({}, users_1.default.resolvers.queries), posts_1.default.resolvers.queries),
+                Mutation: Object.assign(Object.assign({}, users_1.default.resolvers.mutations), posts_1.default.resolvers.mutation),
             },
         });
         yield gqlserver.start();

@@ -1,5 +1,5 @@
 export const queries = `#queries
-getUserToken(email:String!,password:String!):String
+UserLogin(email:String!,password:String!):User
 getCurrentUserLoggedIn:User
 
 `;

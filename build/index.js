@@ -16,19 +16,37 @@ const express_1 = __importDefault(require("express"));
 const express4_1 = require("@apollo/server/express4");
 const graphql_1 = require("./graphql");
 const user_1 = require("./services/user");
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 const PORT = 5000;
+const corsOptions = {
+    origin: "*",
+    credentials: true,
+    optionSuccessStatus: 200,
+};
+app.use((0, cors_1.default)(corsOptions));
+app.use((0, cookie_parser_1.default)());
+app.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const accessToken = req.cookies["access-token"];
+    console.log("here_inside_express");
+    console.log(accessToken);
+    try {
+        const user = yield user_1.UserService.decodeJWTToken(accessToken);
+        req.userId = user.id;
+    }
+    catch (_a) { }
+    next();
+}));
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         app.use(express_1.default.json());
         app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)(), {
-            context: ({ req }) => __awaiter(this, void 0, void 0, function* () {
-                const token = req.headers["token"];
-                try {
-                    const user = yield user_1.UserService.decodeJWTToken(token);
-                    return { user };
-                }
-                catch (_a) { }
+            context: ({ req, res }) => __awaiter(this, void 0, void 0, function* () {
+                return { req, res };
+                // try {,
+                //   return { user };
+                // } catch {}
             }),
         }));
     });

@@ -7,9 +7,19 @@ import {
 
 export const resolvers = {
   queries: {
-    getUserToken: async (_: any, payload: GenerateJWTPayload) => {
-      const res = await UserService.generateJWTToken(payload);
-      return res;
+    UserLogin: async (
+      _: any,
+      payload: GenerateJWTPayload,
+      { req, res }: any
+    ) => {
+      const token = await UserService.generateJWTToken(payload);
+
+      res.cookie("access-token", token, {
+        expires: new Date(Date.now() + 30 * 24 * 3600000),
+      });
+      const user = await UserService.decodeJWTToken(token as string);
+
+      return user;
     },
     getCurrentUserLoggedIn: async (_: any, params: null, context: any) => {
       if (context.user) {

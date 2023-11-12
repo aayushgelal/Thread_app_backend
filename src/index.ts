@@ -4,21 +4,42 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { PrismaClient } from "@prisma/client";
 import { createGraphqlServer } from "./graphql";
 import { UserService } from "./services/user";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 const PORT = 5000;
+const corsOptions = {
+  origin: "*",
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 
+app.use(cookieParser());
+
+app.use(async (req, res, next) => {
+  const accessToken = req.cookies["access-token"];
+  console.log("here_inside_express");
+  console.log(accessToken);
+  try {
+    const user: any = await UserService.decodeJWTToken(accessToken as string);
+    (req as any).userId = user.id;
+  } catch {}
+
+  next();
+});
 async function init() {
   app.use(express.json());
   app.use(
     "/graphql",
+
     expressMiddleware(await createGraphqlServer(), {
-      context: async ({ req }) => {
-        const token = req.headers["token"];
-        try {
-          const user = await UserService.decodeJWTToken(token as string);
-          return { user };
-        } catch {}
+      context: async ({ req, res }: any) => {
+        return { req, res };
+        // try {,
+        //   return { user };
+        // } catch {}
       },
     })
   );

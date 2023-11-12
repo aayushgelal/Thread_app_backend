@@ -4,9 +4,10 @@ import { createHmac, randomBytes } from "crypto";
 
 export interface CreateUserPayload {
   firstName: string;
-  lastName?: string;
+  lastName: string;
   email: string;
   password: string;
+  username: string;
 }
 export interface GenerateJWTPayload {
   email: string;
@@ -22,7 +23,7 @@ export class UserService {
     return createHmac("sha256", salt).update(password).digest("hex");
   }
   public static createUser(payload: CreateUserPayload) {
-    const { firstName, lastName, email, password } = payload;
+    const { firstName, lastName, email, password, username } = payload;
     const salt = randomBytes(32).toString("hex");
     const hashed_password = UserService.generateHash(salt, password);
     return Prisma_Client.user.create({
@@ -31,6 +32,7 @@ export class UserService {
         lastName,
         email,
         password: hashed_password,
+        username,
         salt,
       },
     });
@@ -47,7 +49,17 @@ export class UserService {
     if (hashed_password != user.password) {
       throw new Error("the password is wrong");
     }
-    const token = JWT.sign({ id: user.id, email: user.email }, JWTSECRETKEY);
+    const token = JWT.sign(
+      {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageURL: user.profileImageUrl,
+        username: user.username,
+      },
+      JWTSECRETKEY
+    );
     return token;
   }
   public static async decodeJWTToken(payload: string) {
