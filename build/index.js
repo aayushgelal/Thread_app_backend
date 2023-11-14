@@ -18,10 +18,15 @@ const graphql_1 = require("./graphql");
 const user_1 = require("./services/user");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const cors_1 = __importDefault(require("cors"));
+const http_1 = require("http");
+const graphql_subscriptions_1 = require("graphql-subscriptions");
+// ... previous import statements
 const app = (0, express_1.default)();
+const pubsub = new graphql_subscriptions_1.PubSub();
+const httpServer = (0, http_1.createServer)(app);
 const PORT = 5000;
 const corsOptions = {
-    origin: "*",
+    origin: true,
     credentials: true,
     optionSuccessStatus: 200,
 };
@@ -29,8 +34,6 @@ app.use((0, cors_1.default)(corsOptions));
 app.use((0, cookie_parser_1.default)());
 app.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const accessToken = req.cookies["access-token"];
-    console.log("here_inside_express");
-    console.log(accessToken);
     try {
         const user = yield user_1.UserService.decodeJWTToken(accessToken);
         req.userId = user.id;
@@ -41,9 +44,9 @@ app.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         app.use(express_1.default.json());
-        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)(), {
+        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)(httpServer), {
             context: ({ req, res }) => __awaiter(this, void 0, void 0, function* () {
-                return { req, res };
+                return { req, res, pubsub };
                 // try {,
                 //   return { user };
                 // } catch {}
@@ -55,4 +58,4 @@ init();
 app.get("/", (req, res) => {
     res.sendStatus(200).json({ message: "running successfully" });
 });
-app.listen(PORT, () => console.log("running successfully"));
+httpServer.listen(PORT, () => console.log("running successfully"));

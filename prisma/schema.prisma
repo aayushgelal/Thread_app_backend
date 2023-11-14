@@ -29,6 +29,7 @@ model Post {
   user      User   @relation(fields: [userId], references: [username])
   imageLink String?
   likes     Int
+  createdTime DateTime @default(now())
 
   @@map("posts")
 }

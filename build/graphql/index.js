@@ -16,26 +16,65 @@ exports.createGraphqlServer = void 0;
 const server_1 = require("@apollo/server");
 const users_1 = __importDefault(require("./users"));
 const posts_1 = __importDefault(require("./posts"));
-function createGraphqlServer() {
+const drainHttpServer_1 = require("@apollo/server/plugin/drainHttpServer");
+const schema_1 = require("@graphql-tools/schema");
+const ws_1 = require("graphql-ws/lib/use/ws");
+const ws_2 = require("ws");
+function createGraphqlServer(httpServer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const gqlserver = new server_1.ApolloServer({
-            typeDefs: `
-    ${users_1.default.typeDefs}
-    ${posts_1.default.typeDefs}
-    type Query{
-        ${users_1.default.queries}
-        ${posts_1.default.queries}
-    }
-    type Mutation{
-        ${users_1.default.mutation}
-        ${posts_1.default.mutation}
+        const typeDefs = `
+  ${users_1.default.typeDefs}
+  ${posts_1.default.typeDefs}
+  type Query{
+      ${users_1.default.queries}
+      ${posts_1.default.queries}
+  }
+  type Mutation{
+      ${users_1.default.mutation}
+      ${posts_1.default.mutation}
 
-    }
-    `,
-            resolvers: {
-                Query: Object.assign(Object.assign({}, users_1.default.resolvers.queries), posts_1.default.resolvers.queries),
-                Mutation: Object.assign(Object.assign({}, users_1.default.resolvers.mutations), posts_1.default.resolvers.mutation),
-            },
+
+  }
+  type Subscription{
+    ${posts_1.default.subscriptions}
+  }
+  `;
+        const resolvers = {
+            Query: Object.assign(Object.assign({}, users_1.default.resolvers.queries), posts_1.default.resolvers.queries),
+            Mutation: Object.assign(Object.assign({}, users_1.default.resolvers.mutations), posts_1.default.resolvers.mutation),
+            Subscription: Object.assign({}, posts_1.default.resolvers.subscription),
+        };
+        const schema = (0, schema_1.makeExecutableSchema)({ typeDefs, resolvers });
+        const wsServer = new ws_2.WebSocketServer({
+            // This is the `httpServer` we created in a previous step.
+            server: httpServer,
+            // Pass a different path here if app.use
+            // serves expressMiddleware at a different path
+            path: "/graphql",
+        });
+        // Hand in the schema we just created and have the
+        // WebSocketServer start listening.
+        const serverCleanup = (0, ws_1.useServer)({ schema }, wsServer);
+        const gqlserver = new server_1.ApolloServer({
+            schema,
+            plugins: [
+                // Proper shutdown for the HTTP server.
+                (0, drainHttpServer_1.ApolloServerPluginDrainHttpServer)({ httpServer }),
+                // Proper shutdown for the WebSocket server.
+                {
+                    serverWillStart() {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            return {
+                                drainServer() {
+                                    return __awaiter(this, void 0, void 0, function* () {
+                                        yield serverCleanup.dispose();
+                                    });
+                                },
+                            };
+                        });
+                    },
+                },
+            ],
         });
         yield gqlserver.start();
         return gqlserver;

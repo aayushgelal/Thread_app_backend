@@ -11,7 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolvers = void 0;
 const post_1 = require("../../services/post");
+const graphql_scalars_1 = require("graphql-scalars");
 exports.resolvers = {
+    DateTime: graphql_scalars_1.DateTimeResolver,
     queries: {
         getAllPosts: (_, payload, { req, res }) => __awaiter(void 0, void 0, void 0, function* () {
             if (req.userId) {
@@ -21,8 +23,9 @@ exports.resolvers = {
         }),
     },
     mutation: {
-        createPost: (_, payload, { req, res }) => __awaiter(void 0, void 0, void 0, function* () {
+        createPost: (_, payload, { req, res, pubsub }) => __awaiter(void 0, void 0, void 0, function* () {
             if (req.userId) {
+                pubsub.publish("POST_CREATED", { postCreated: payload });
                 const Post = yield post_1.PostService.createPost(payload);
                 return Post;
             }
@@ -30,5 +33,10 @@ exports.resolvers = {
                 throw new Error("Posted Without User");
             }
         }),
+    },
+    subscription: {
+        postCreated: {
+            subscribe: (_, { pubsub }) => pubsub.asyncIterator(["POST_CREATED"]),
+        },
     },
 };

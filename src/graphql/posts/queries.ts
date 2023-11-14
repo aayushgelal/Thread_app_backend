@@ -1,1 +1,1 @@
-export const queries = "getAllPosts:[Post]";
+export const queries = "getAllPosts(orderBy:{field,direction} ):[Post]";
