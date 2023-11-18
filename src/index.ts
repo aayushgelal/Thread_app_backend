@@ -6,11 +6,9 @@ import { UserService } from "./services/user";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { createServer } from "http";
-import { PubSub } from "graphql-subscriptions";
 // ... previous import statements
 
 const app = express();
-const pubsub = new PubSub();
 const httpServer = createServer(app);
 
 const PORT = 5000;
@@ -39,7 +37,7 @@ async function init() {
 
     expressMiddleware(await createGraphqlServer(httpServer), {
       context: async ({ req, res }: any) => {
-        return { req, res, pubsub };
+        return { req, res };
         // try {,
         //   return { user };
         // } catch {}

@@ -23,6 +23,6 @@ export class PostService {
     });
   }
   public static getAllPosts() {
-    return Prisma_Client.post.findMany();
+    return Prisma_Client.post.findMany({include:{user:true}});
   }
 }

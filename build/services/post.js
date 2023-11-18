@@ -15,7 +15,7 @@ class PostService {
         });
     }
     static getAllPosts() {
-        return db_1.Prisma_Client.post.findMany();
+        return db_1.Prisma_Client.post.findMany({ include: { user: true } });
     }
 }
 exports.PostService = PostService;

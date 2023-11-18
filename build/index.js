@@ -19,10 +19,8 @@ const user_1 = require("./services/user");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = require("http");
-const graphql_subscriptions_1 = require("graphql-subscriptions");
 // ... previous import statements
 const app = (0, express_1.default)();
-const pubsub = new graphql_subscriptions_1.PubSub();
 const httpServer = (0, http_1.createServer)(app);
 const PORT = 5000;
 const corsOptions = {
@@ -46,7 +44,7 @@ function init() {
         app.use(express_1.default.json());
         app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.createGraphqlServer)(httpServer), {
             context: ({ req, res }) => __awaiter(this, void 0, void 0, function* () {
-                return { req, res, pubsub };
+                return { req, res };
                 // try {,
                 //   return { user };
                 // } catch {}

@@ -54,7 +54,17 @@ function createGraphqlServer(httpServer) {
         });
         // Hand in the schema we just created and have the
         // WebSocketServer start listening.
-        const serverCleanup = (0, ws_1.useServer)({ schema }, wsServer);
+        const serverCleanup = (0, ws_1.useServer)({
+            schema,
+            onConnect: (ctx) => __awaiter(this, void 0, void 0, function* () {
+                console.log("connected");
+                // Check authentication every time a client connects.
+                // You can return false to close the connection or throw an explicit error
+            }),
+            onDisconnect(ctx, code, reason) {
+                console.log("Disconnected!");
+            },
+        }, wsServer);
         const gqlserver = new server_1.ApolloServer({
             schema,
             plugins: [

@@ -1,1 +1,1 @@
-export const subscriptions = "postCreated: Post";
+export const subscriptions = "postCreated: [Post]";

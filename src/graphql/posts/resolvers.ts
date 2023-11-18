@@ -4,6 +4,9 @@ import {
   PostService,
 } from "../../services/post";
 import { DateTimeResolver } from "graphql-scalars";
+import { PubSub } from "graphql-subscriptions";
+
+const pubsub = new PubSub();
 
 export const resolvers = {
   DateTime: DateTimeResolver,
@@ -20,10 +23,11 @@ export const resolvers = {
     createPost: async (
       _: any,
       payload: CreatePostPayload,
-      { req, res, pubsub }: any
+      { req, res }: any
     ) => {
       if (req.userId) {
         pubsub.publish("POST_CREATED", { postCreated: payload });
+        console.log(pubsub);
 
         const Post = await PostService.createPost(payload);
         return Post;
@@ -34,8 +38,11 @@ export const resolvers = {
   },
   subscription: {
     postCreated: {
-      subscribe: (_: any, { pubsub }: any) =>
-        pubsub.asyncIterator(["POST_CREATED"]),
+      subscribe: () => {
+        console.log("listening");
+
+        return pubsub.asyncIterator(["POST_CREATED"]);
+      },
     },
   },
 };

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.typeDefs = void 0;
 exports.typeDefs = `#graphql
-scalar DateTime
+scalar Date
 
 type Post{
     id:ID!,
@@ -10,7 +10,8 @@ type Post{
     userId:String!,
     imageUrl:String,
     likes:Int!
-    createdTime: DateTime!
+    createdTime: Date!
+    user:User
 
    
 }`;

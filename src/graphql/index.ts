@@ -8,7 +8,6 @@ import { Server } from "http";
 import { WebSocketServer } from "ws";
 
 export async function createGraphqlServer(httpServer: Server) {
- 
   const typeDefs = `
   ${User.typeDefs}
   ${Post.typeDefs}
@@ -42,7 +41,20 @@ export async function createGraphqlServer(httpServer: Server) {
   });
   // Hand in the schema we just created and have the
   // WebSocketServer start listening.
-  const serverCleanup = useServer({ schema }, wsServer);
+  const serverCleanup = useServer(
+    {
+      schema,
+      onConnect: async (ctx) => {
+        console.log("connected");
+        // Check authentication every time a client connects.
+        // You can return false to close the connection or throw an explicit error
+      },
+      onDisconnect(ctx, code, reason) {
+        console.log("Disconnected!");
+      },
+    },
+    wsServer
+  );
   const gqlserver = new ApolloServer({
     schema,
     plugins: [
